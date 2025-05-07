@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catinder - Trouvez votre chat idéal</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Catinder</h1>
+            <div class="user-section">
+                <span id="user-info"></span>
+                <a href="#" id="logout-btn" class="logout-button">Déconnexion</a>
+            </div>
+            <div class="nav-links">
+                <a href="#" id="home-link" class="active">Swipe</a>
+                <a href="#" id="likes-link">Mes Likes</a>
+            </div>
+        </header>
+
+        <main>
+            <div id="swipe-container">
+                <div id="card-container">
+                    <!-- Les cartes de chats seront générées ici par JavaScript -->
+                    <div class="loading">Chargement des chats...</div>
+                </div>
+                <div class="swipe-buttons">
+                    <button id="dislike-btn">❌</button>
+                    <button id="like-btn">❤️</button>
+                </div>
+            </div>
+
+            <div id="likes-container" class="hidden">
+                <h2>Mes chats préférés</h2>
+                <div id="liked-cats-grid">
+                    <!-- Les likes affichés ici -->
+                    <div class="loading">Chargement de vos likes...</div>
+                </div>
+            </div>
+        </main>
+
+        <div id="cat-detail-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div id="modal-cat-info">
+                    <!-- Détails du chat sélectionné -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
