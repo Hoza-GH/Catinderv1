@@ -28,6 +28,19 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Fonction pour vérifier si l'utilisateur est admin
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        
+        if session.get('username') != 'admin':
+            return redirect(url_for('index'))
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Fonction pour hasher le mot de passe
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -107,6 +120,11 @@ def login():
         if user:
             session['user_id'] = user['id']
             session['username'] = user['username']
+            
+            # Si c'est un admin, rediriger vers la page d'administration
+            if username == 'admin':
+                return redirect(url_for('admin'))
+            
             return redirect(url_for('index'))
         else:
             return render_template('login.html', error="Nom d'utilisateur ou mot de passe incorrect")
@@ -124,6 +142,12 @@ def logout():
 def index():
     return render_template('index.html')
 
+# Route d'administration
+@app.route('/admin')
+@admin_required
+def admin():
+    return render_template('admin.html')
+
 @app.route('/api/cats')
 @login_required
 def get_cats():
@@ -136,7 +160,7 @@ def get_cats():
     cursor.execute("""
         SELECT c.* FROM chats c
         LEFT JOIN likes l ON c.id = l.cat_id AND l.user_id = %s
-        WHERE l.id IS NULL
+        WHERE l.id IS NULL AND c.banned = 0
         LIMIT 20
     """, (user_id,))
     
@@ -187,7 +211,7 @@ def get_likes():
     cursor.execute("""
         SELECT c.* FROM chats c
         JOIN likes l ON c.id = l.cat_id
-        WHERE l.user_id = %s
+        WHERE l.user_id = %s AND c.banned = 0
         ORDER BY l.created_at DESC
     """, (user_id,))
     
@@ -204,6 +228,64 @@ def get_user():
         "id": session.get('user_id'),
         "username": session.get('username')
     })
+
+# Routes d'API pour l'administration
+@app.route('/api/admin/cats')
+@admin_required
+def admin_get_all_cats():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute("""
+        SELECT * FROM chats
+        WHERE banned = 0
+        ORDER BY id DESC
+    """)
+    
+    cats = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return jsonify(cats)
+
+@app.route('/api/admin/ban-cat', methods=['POST'])
+@admin_required
+def admin_ban_cat():
+    data = request.json
+    cat_id = data.get('cat_id')
+    
+    if not cat_id:
+        return jsonify({"success": False, "message": "ID du chat manquant"}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Mettre à jour le statut du chat en 'banni'
+        cursor.execute("""
+            UPDATE chats
+            SET banned = 1
+            WHERE id = %s
+        """, (cat_id,))
+        
+        conn.commit()
+        
+        # Supprimer tous les likes associés à ce chat
+        cursor.execute("""
+            DELETE FROM likes
+            WHERE cat_id = %s
+        """, (cat_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"success": True, "message": "Annonce bannie avec succès!"})
+        
+    except mysql.connector.Error as err:
+        cursor.close()
+        conn.close()
+        return jsonify({"success": False, "message": str(err)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

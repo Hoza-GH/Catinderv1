@@ -9,11 +9,10 @@ let likedCats = [];
 const cardContainer = document.getElementById('card-container');
 const likeBtn = document.getElementById('like-btn');
 const dislikeBtn = document.getElementById('dislike-btn');
-const homeLink = document.getElementById('home-link');
-const likesLink = document.getElementById('likes-link');
+const adminLink = document.getElementById('admin-link');
 const swipeContainer = document.getElementById('swipe-container');
-const likesContainer = document.getElementById('likes-container');
-const likedCatsGrid = document.getElementById('liked-cats-grid');
+const likesSidebar = document.getElementById('likes-sidebar');
+const likedCatsList = document.getElementById('liked-cats-list');
 const modal = document.getElementById('cat-detail-modal');
 const closeModal = document.querySelector('.close-modal');
 const modalCatInfo = document.getElementById('modal-cat-info');
@@ -36,6 +35,11 @@ async function getCurrentUser() {
         // Mettre à jour l'affichage avec le nom d'utilisateur
         if (userInfoElement) {
             userInfoElement.textContent = username;
+        }
+        
+        // Afficher le lien d'administration si l'utilisateur est admin
+        if (username === 'admin' && adminLink) {
+            adminLink.classList.remove('hidden');
         }
         
         return userData;
@@ -70,7 +74,7 @@ async function fetchLikedCats() {
         displayLikedCats();
     } catch (error) {
         console.error('Erreur:', error);
-        likedCatsGrid.innerHTML = '<div class="error">Impossible de charger vos chats aimés. Veuillez réessayer plus tard.</div>';
+        likedCatsList.innerHTML = '<div class="error">Impossible de charger vos chats aimés. Veuillez réessayer plus tard.</div>';
     }
 }
 
@@ -88,7 +92,8 @@ async function likeCat(catId) {
             throw new Error('Erreur lors du like');
         }
 
-        // La requête a réussi, on continue avec le swipe
+        // La requête a réussi, on continue avec le swipe et on met à jour la liste des likes
+        fetchLikedCats();
         return true;
     } catch (error) {
         console.error('Erreur:', error);
@@ -129,26 +134,26 @@ function displayCurrentCat() {
 
 function displayLikedCats() {
     if (likedCats.length === 0) {
-        likedCatsGrid.innerHTML = '<div class="no-likes">Vous n\'avez pas encore aimé de chats.</div>';
+        likedCatsList.innerHTML = '<div class="no-likes">Vous n\'avez pas encore aimé de chats.</div>';
         return;
     }
     
-    likedCatsGrid.innerHTML = '';
+    likedCatsList.innerHTML = '';
     
     likedCats.forEach(cat => {
-        const card = document.createElement('div');
-        card.classList.add('liked-cat-card');
+        const catItem = document.createElement('div');
+        catItem.classList.add('liked-cat-item');
         
-        card.innerHTML = `
+        catItem.innerHTML = `
             <img src="${cat.image_url}" alt="${cat.nom}">
-            <div class="cat-info">
+            <div class="liked-cat-info">
                 <h3>${cat.nom}</h3>
                 <p>${cat.race_age}</p>
             </div>
         `;
         
-        card.addEventListener('click', () => openCatDetails(cat));
-        likedCatsGrid.appendChild(card);
+        catItem.addEventListener('click', () => openCatDetails(cat));
+        likedCatsList.appendChild(catItem);
     });
 }
 
@@ -211,28 +216,6 @@ function swipeRight() {
     }
 }
 
-// Navigation
-function showSwipeView() {
-    swipeContainer.classList.remove('hidden');
-    likesContainer.classList.add('hidden');
-    homeLink.classList.add('active');
-    likesLink.classList.remove('active');
-    
-    // Recharger les chats si nécessaire
-    if (cats.length === 0 || currentCatIndex >= cats.length) {
-        fetchCats();
-    }
-}
-
-function showLikesView() {
-    swipeContainer.classList.add('hidden');
-    likesContainer.classList.remove('hidden');
-    homeLink.classList.remove('active');
-    likesLink.classList.add('active');
-    
-    fetchLikedCats();
-}
-
 // Event listeners
 document.addEventListener('DOMContentLoaded', async () => {
     // Vérifier si l'utilisateur est connecté
@@ -242,23 +225,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return; // Redirection vers /login déjà gérée dans getCurrentUser
     }
     
-    // Charger les premiers chats
+    // Charger les chats pour swipe et les chats likés
     fetchCats();
+    fetchLikedCats();
     
     // Boutons de swipe
     likeBtn.addEventListener('click', swipeRight);
     dislikeBtn.addEventListener('click', swipeLeft);
-    
-    // Navigation
-    homeLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        showSwipeView();
-    });
-    
-    likesLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        showLikesView();
-    });
     
     // Modal
     closeModal.addEventListener('click', () => {

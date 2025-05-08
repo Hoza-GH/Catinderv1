@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catinder - Administration</title>
+    <!-- Importante: d'abord charger admin.css avant style.css pour éviter les conflits -->
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <header>
+            <div class="admin-header">
+                <h1>Catinder Administration</h1>
+                <div class="user-section">
+                    <span id="user-info">Admin</span>
+                    <a href="/logout" class="logout-button">Déconnexion</a>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Retour à l'application</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="admin-controls">
+                <h2>Gestion des annonces</h2>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Rechercher un chat...">
+                    <button id="search-btn">Rechercher</button>
+                </div>
+            </div>
+
+            <div id="cats-listing">
+                <div class="listing-container">
+                    <!-- Les annonces seront générées ici par JavaScript -->
+                    <div class="loading">Chargement des annonces...</div>
+                </div>
+                <div class="pagination">
+                    <button id="prev-page" disabled>Précédent</button>
+                    <span id="page-info">Page 1</span>
+                    <button id="next-page">Suivant</button>
+                </div>
+            </div>
+
+            <!-- Modal de confirmation pour bannir une annonce -->
+            <div id="ban-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <div class="modal-header">
+                        <h3>Confirmation</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir bannir cette annonce ?</p>
+                        <div class="cat-summary" id="cat-to-ban-info">
+                            <!-- Informations sur le chat à bannir -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="cancel-ban" class="btn secondary-btn">Annuler</button>
+                        <button id="confirm-ban" class="btn danger-btn">Bannir l'annonce</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>
