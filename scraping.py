@@ -47,7 +47,7 @@ while page < 25:
             raceAge = annonce.select_one("p", class_="open-sans text-sm text-gray-dark-sc md:text-xs lg:text-sm pb-2 px-4")
             raceAge = raceAge.text.strip() if raceAge else "inconnu"
 
-            # --- 🆕 Récupération des détails ---
+            #  Récupération des détails
             description = "Non disponible"
             autres_images = []
 
@@ -61,12 +61,33 @@ while page < 25:
                 detail_response = requests.get(full_url)
 
                 if detail_response.status_code == 200:
-                    detail_soup = BeautifulSoup(detail_response.text, 'html.parser')
-
-                    # Description (souvent dans un <div> spécifique)
+                    detail_soup = BeautifulSoup(detail_response.text, 'html.parser')                    # Description (souvent dans un <div> spécifique)
                     desc_div = detail_soup.find("main", class_="ccontainer editorialcontent relative flex flex-col gap-4 pb-12 lg:pb-20 lg:pt-0")
                     if desc_div:
+                        # Extraction du texte brut
                         description = desc_div.get_text(separator=" ", strip=True)
+                        
+                        # Suppression de "Présentation" au début et "Retour à la recherche" à la fin
+                        if description.startswith("Présentation"):
+                            description = description[len("Présentation"):].strip()
+                        if description.endswith("Retour à la recherche"):
+                            description = description[:-len("Retour à la recherche")].strip()
+                        
+                        # Amélioration de la lisibilité en ajoutant des sauts de ligne
+                        # Séparation par phrases pour créer des paragraphes
+                        sentences = description.split(". ")
+                        paragraphs = []
+                        current_paragraph = []
+                        
+                        for i, sentence in enumerate(sentences):
+                            current_paragraph.append(sentence)
+                            # Créer un nouveau paragraphe tous les 2-3 phrases ou à la fin
+                            if (i + 1) % 3 == 0 or i == len(sentences) - 1:
+                                paragraphs.append(". ".join(current_paragraph) + ("." if not sentence.endswith(".") else ""))
+                                current_paragraph = []
+                        
+                        # Recombiner avec des sauts de ligne entre paragraphes
+                        description = "\n\n".join(paragraphs)
 
                     # Autres images (miniatures ou galeries)
                     gallery_imgs = detail_soup.find_all("img")
@@ -78,7 +99,7 @@ while page < 25:
                 else:
                     print(f"Erreur de chargement de la page de détail : {full_url}")
 
-            # --- Insertion en base de données ---
+            #  Insertion en base de données 
             cursor.execute("""
                 INSERT INTO chats (nom, race_age, image_url, lien, description, autres_images)
                 VALUES (%s, %s, %s, %s, %s, %s)
