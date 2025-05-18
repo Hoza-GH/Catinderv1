@@ -18,7 +18,7 @@ print("Début du scraping...")
 page = 1  # Débute à la première page
 all_annonces = []
 
-while page < 25:
+while page < 5:
     url = f"https://www.secondechance.org/animal/adopter-un-chat/{page}"
     print(f"Récupération de la page {page}...")
 
