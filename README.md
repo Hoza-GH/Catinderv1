@@ -27,12 +27,9 @@ pip install -r requirements.txt
 
 5. **Configurez la base de données MySQL**
 
-- Créez une base de données nommée `Catinder`
-- Importez les fichiers SQL pour créer les tables:
+- Créez une base de données nommée `catinder`
+- Importez le fichier SQL pour créer les tables:
 
-```bash
-mysql -u root -p catinder < catinder.sql
-```
 
 6. **Lancez l'application**
 
@@ -63,7 +60,7 @@ def get_db_connection():
 
 ## Alimenter la base de données avec des chats
 
-Pour peupler la base de données avec des profils de chats, vous pouvez utiliser le script de scraping inclus:
+Pour alimenter la base de données avec des profils de chats, vous pouvez utiliser le script de scraping inclus:
 
 ```bash
 python scraping.py
@@ -80,7 +77,7 @@ Ce script récupère des informations sur des chats disponibles à l'adoption de
   - `js/` - Les fichiers JavaScript
 - `templates/` - Les templates HTML
 - `catinder.sql` - Structure de la base de données pour les chats
-- `users.sql` - Structure de la base de données pour les utilisateurs
+
 
 ## Fonctionnement de l'application
 
